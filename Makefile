@@ -76,7 +76,7 @@ AS = $(TOOLPREFIX)gas
 LD = $(TOOLPREFIX)ld
 OBJCOPY = $(TOOLPREFIX)objcopy
 OBJDUMP = $(TOOLPREFIX)objdump
-CFLAGS = -fno-pic -static -fno-builtin -fno-strict-aliasing -g -O2 -Wall -MD -ggdb -m32 -fno-omit-frame-pointer -fno-strict-overflow
+CFLAGS = -fno-pic -static -fno-builtin -fno-strict-aliasing -g -O2 -Wall -MD -ggdb -m32 -fno-omit-frame-pointer -Wall
 CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
 ASFLAGS = -m32 -gdwarf-2 -Wa,-divide
 # FreeBSD ld wants ``elf_i386_fbsd''
@@ -114,9 +114,10 @@ entryother: entryother.S
 	$(OBJCOPY) -S -O binary -j .text bootblockother.o entryother
 	$(OBJDUMP) -S bootblockother.o > entryother.asm
 
-initcode: initcode.S
+initcode: initcode.S initcode.ld
 	$(CC) $(CFLAGS) -nostdinc -I. -c initcode.S
-	$(LD) $(LDFLAGS) -N -e start -Ttext 0 -o initcode.out initcode.o
+	# -T initcode.ld replaces old-school -Ttext 0 here. Modern GNU linker/objdump went crazy with the init binary, generating a 130M file.
+	$(LD) $(LDFLAGS) -N -e start -T initcode.ld -o initcode.out initcode.o
 	$(OBJCOPY) -S -O binary initcode.out initcode
 	$(OBJDUMP) -S initcode.o > initcode.asm
 

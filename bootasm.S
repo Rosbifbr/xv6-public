@@ -18,10 +18,6 @@ start:
   movw    %ax,%es             # -> Extra Segment
   movw    %ax,%ss             # -> Stack Segment
 
-  # Print boot message
-  movw    $boot_message, %si
-  call    print_string
-
   # Physical address line A20 is tied to zero so that the first PCs 
   # with 2 MB would run software that assumed 1 MB.  Undo that.
 seta20.1:
@@ -89,22 +85,4 @@ gdt:
 gdtdesc:
   .word   (gdtdesc - gdt - 1)             # sizeof(gdt) - 1
   .long   gdt                             # address gdt
-
-# Function to print a null-terminated string using BIOS interrupt
-# Input: %si points to the string
-print_string:
-  movb    $0x0e, %ah         # BIOS teletype function
-  xorb    %bh, %bh           # Page 0
-print_loop:
-  lodsb                      # Load byte from %si into %al and increment %si
-  testb   %al, %al           # Test if character is 0 (end of string)
-  jz      print_done         # If it's 0, we're done
-  int     $0x10              # Call BIOS interrupt to print character
-  jmp     print_loop         # Repeat with next character
-print_done:
-  ret
-
-# Boot messages
-boot_message:
-  .asciz "BIOS sectore loaded\r\nAtt load kern"
 

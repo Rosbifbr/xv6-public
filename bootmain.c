@@ -31,7 +31,7 @@ bootmain(void)
   if(elf->magic != ELF_MAGIC)
     return;  // let bootasm.S handle error
 
-  // Load each program segment (ignores ph flags).
+  // Load each program segment (ignores ph flags). #FIXME: Boot sequence is hanging here
   ph = (struct proghdr*)((uchar*)elf + elf->phoff);
   eph = ph + elf->phnum;
   for(; ph < eph; ph++){
